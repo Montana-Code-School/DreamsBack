@@ -57,7 +57,9 @@ const {
   getDreamsByUserId,
   editDream,
   deleteDream,
-  editDreamCases
+  editDreamCases,
+  stem,
+  chunk,
 } = require('./routeHandlers');
 
 // Must use body-parser middleware before routes are called
@@ -90,6 +92,13 @@ app.get('/test', function(req, res){
   res.json({'message': 'worked!'});
   // data.message = "worked!"
 });
+
+// make a request to the stemmer
+app.post('/stem', stem );
+
+// make a request to the chunker
+app.post('/chunk', chunk );
+
 // put dreams in the DB
 app.post('/dreams', createDream );
 

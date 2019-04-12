@@ -4,7 +4,7 @@
     "sourceType": "module"
   },
   "rules": {
-    "quotes": ["error", "single"],
+    "quotes": ["warning", "single"],
     "indent": ["error", 2],
     "max-len": ["error", 100],
     "multiline-comment-style": ["error", "separate-lines"],

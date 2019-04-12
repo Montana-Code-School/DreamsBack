@@ -9,15 +9,25 @@ const {
   ERR_QUERY,
   ERR_ID,
   ERR_CONTENT,
-  ERR_USERID
+  ERR_USERID,
+  STEM,
+  CHUNK,
 } = require('./constants');
 
 const { Dream, Image } = require('./models');
+
+const axios = require('axios');
 
 const { allNewImages, noNewImages, mixedOldAndNewImages, noImages } = require('./test/data/dream');
 
 const bodyValid = (req, res, type) => {
   switch (type) {
+  case STEM:
+    if(!req.body) {
+      return res.status(400).json({ error: ERR_BODY });
+    } else {
+      return true;
+    }
   case CREATE_DREAM:
     if(!req.body) {
       return res.status(400).json({ error: ERR_BODY });
@@ -72,6 +82,37 @@ const bodyValid = (req, res, type) => {
 };
 
 module.exports = {
+  [STEM](req, res) {
+    // if(bodyValid(req, res, STEM)) {
+    const params = new URLSearchParams();
+    console.log('req body ', req.body);
+    params.append('text', req.body.text);
+    params.append('stemmer', 'wordnet');
+    axios.post('http://text-processing.com/api/stem/', params)
+      .then(response => {
+        console.log('axios response, ', response.data);
+        res.status(200).json(response.data);
+      })
+      .catch((error) => {
+        res.status(400).json(error);
+      });
+    // }
+  },
+  [CHUNK](req, res) {
+    // if(bodyValid(req, res, STEM)) {
+    const params = new URLSearchParams();
+    console.log('req body ', req.body);
+    params.append('text', req.body.text);
+    axios.post('http://text-processing.com/api/tag/', params)
+      .then(response => {
+        console.log('axios response, ', response.data);
+        res.status(200).json(response.data);
+      })
+      .catch((error) => {
+        res.status(400).json(error);
+      });
+    // }
+  },
   [CREATE_DREAM](req, res) {
     if(bodyValid(req, res, CREATE_DREAM)) {
       Image.create(req.body.images, (err, savedImages) => {
