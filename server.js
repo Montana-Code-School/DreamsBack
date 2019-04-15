@@ -51,6 +51,9 @@ db.on('error', console.error.bind(console, 'connection error:'));
 // Confirm connection when connected:
 db.once('open', onDBConnected);
 
+//import route handler for LitPage from articles.js
+const { getArticles } = require('./articles');
+
 // routeHandlers are imported and destructured from our exported routeHandlers file
 const {
   createDream,
@@ -92,6 +95,8 @@ app.get('/test', function(req, res){
   res.json({'message': 'worked!'});
   // data.message = "worked!"
 });
+// Get articles
+app.get('/articles', getArticles);
 
 // make a request to the stemmer
 app.post('/stem', stem );
