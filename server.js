@@ -13,6 +13,14 @@ const mongoose = require('mongoose');
 // add cors into the app
 const cors = require('cors');
 
+// add firebase auth to our server
+const admin = require('firebase-admin');
+
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+  databaseURL: 'https://dream-journal-test.firebaseio.com'
+});
+
 // Local variables for database
 // Destructure our process.env variables
 const { MONGODB_URI, PORT, FRONTEND_URL } = process.env;
@@ -60,6 +68,7 @@ const {
   editDreamCases,
   stem,
   chunk,
+  authenticateUser,
 } = require('./routeHandlers');
 
 // Must use body-parser middleware before routes are called
@@ -83,6 +92,19 @@ if (debug) {
 // Make a test route that sends back json and status 200 -->
 // Test route yay!  which takes in req and res
 app.get('/test', function(req, res){
+  const sessionCookie = req.cookies.session || '';
+  // Verify the session cookie. In this case an additional check is added to detect
+  // if the user's Firebase session was revoked, user deleted/disabled, etc.
+  admin.auth().verifySessionCookie(
+    sessionCookie, true /** checkRevoked */)
+    .then((decodedClaims) => {
+      serveContentForUser('/test', req, res, decodedClaims);
+    })
+    .catch(error => {
+      // Session cookie is unavailable or invalid. Force user to login.
+      console.log("test session cookie error ", error)
+      // res.redirect('/login');
+    });
   // it should respond with a status of 200
   // res is the response object
   // it has a method on it called status
@@ -91,7 +113,20 @@ app.get('/test', function(req, res){
   // which returns a JSON object -> {"somekey": "some value"}
   res.json({'message': 'worked!'});
   // data.message = "worked!"
+
 });
+
+// verify firebase user via routehandler
+app.post('/auth', authenticateUser );
+
+// verify firebase-admin user via middleware
+// const { authMe } = require("./auth");
+// app.use(authMe);
+
+// very firebase current user via middleware
+// const { isAuthenticated } = require('./auth')
+// app.use('/dreams', isAuthenticated);
+
 
 // make a request to the stemmer
 app.post('/stem', stem );

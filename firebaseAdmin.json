@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "dream-journal-test",
+  "private_key_id": "cc8e5d999b69e4d5cf36d1607f685e5b9f0e5e50",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDIT+ogkh3+GHlM\nRp9OIiJU+04bh+/yEseg2R2NHLP+MYl2Rtte42CnUBwUKnIQoWVGoR0jf3KgO0bf\njExbAYQ6zB2AtxlFqDa7ipz2awLfsFUiiiiP1SXsn+miG+pNieHSN2qpfgo3wZot\nT2rQ0lRVZ7qJIefwaP2XxAwvvU2PCuWKUTrlANndU4ghsQaE5oDmFE9tiJA7rsfk\n8+z7Hb/HesQGh8Zq8DjeGy07ybMog1yJ7JJrl1BE2ZkqaJ7eruLh3YsSFrTZb9Eg\niJl/DPsuRwnGyi5F2D5o82tEWXaUFlidFQhbYHNkc9KhBmCJSm7umd/5OwB0qTPk\nQ9ml2IwPAgMBAAECggEANcwIpCC5/2ERSqP46uIN+GbZzlkO3yOeC5vj7N8VlCI3\nudVD21MTxTulnuDba439BiAFFGCJJ3FkEmu6ogJhQe1JyyThm6yWrn2GtEN/LRZN\ndw5F4IMtQUSdWZVHsvVh+bQ6aDTah6juQFcA5/5k+d724ReDFDUOTnEvmK6tosmf\nEHkpq68aHUYZWx33KSyfA8jf3+fmAj+0ANKRqqm2xkMNJEokNk92GJyCBHj58hUc\nnj5jibVaedqjpQWSdbJH7zBU2BHi4SmSeFt+JUIjkN6fRQk4iJCIWxYlhCcYxpEK\nXAYcabwxhtLwNeDWwpYe11nfHUoBQp5vQk52YD97gQKBgQD8EKoTWYEm+RTCPUIA\nKyP55L4tO/xnw2jEks586aeWZgoNfj10E0Rd3pwZ/oFEOIMyfvzQgMVq46+leV9S\nVf3cxXqetGV//qmL0SPQ169mPs8VpM/tBg/5DHuwTjrHAZ00NvMFCBu6jziUWALl\nXSjHFa36nWk7OaQc9j7EQWu0TwKBgQDLcG2oT4yWmMjZvhqajvAuIbMqfLepjR7A\n29xqp3vfDtRPCtpznS9RhWofKpBonBeDQRnD+y8nSvPaavx6Z1+feibaf9UWu2Fw\nLJbEMTNrYZyw/DKxvYx6qIOl7O7sHJ7qaJk+Vcadw993WLEmNgYHeK8QQ1MUJ7k9\nuVuZgV78QQKBgQCdy8Tc1iRPBJElQ/oEZv1fm/4eDTZmsuLsZEcV1aQPOBPE/Kl1\n9/XNmeU5NKUx0vr26p5T3Lk5wA2eVowA3EpPIeUwYxhDd2YmXCfCvrNUG6/CCeoM\npMXtEA6CgYa0PGNwY5HhLYFGWhB+dVZixd4YO48tm8tbwyrk4pbKf3XwawKBgQCg\nFtT0AcVsLMbBMivVPG4cn0BSStpsfjSZJ2qIM0vy98RyfuPw3tyBli8wX1pMN6j5\nDJ2t71fn37+NPWt5FyfUY1d30ehpfwLqNuxdbyo7chDP5WYvIC4Px9PxGkXZX5xe\ncflFaFJni9+qFw0wOIr+DiYU8iXKUoge3mIKpheNAQKBgQCL4cXFNAcAaqNmWUSP\niHgrrgIXbuazK+DWKuv00gUjjQS2ZrpyV+7PZP0mGoYeJHtW4A3BoYI+OQRW+jAi\nCPBAzCtHOuWeC2I0IFRyRiHAqSJ26IVMNpdO+R9Zr3O+4UMu0s/0kbxDUvnB7owL\nl/QE4WC19cfPTMpS7Hf4zDiUJw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-6mfez@dream-journal-test.iam.gserviceaccount.com",
+  "client_id": "104992517465997479320",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-6mfez%40dream-journal-test.iam.gserviceaccount.com"
+}
