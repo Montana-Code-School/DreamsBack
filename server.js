@@ -7,6 +7,9 @@ const express = require('express');
 // for reading parameters attached on the body on a web request
 const bodyParser = require('body-parser');
 
+// cookie parser
+const cookieParser = require('cookie-parser');
+
 // mongoose the ODM that connects to mongodb
 const mongoose = require('mongoose');
 
@@ -36,6 +39,7 @@ const corsOptions = {
   origin: FRONTEND_URL,
   allowedHeaders: 'Origin, X-Requested-With, Content-Type',
   methods: 'GET, PUT, POST, DELETE',
+  credentials: true,
 };
 
 // middleware to attach cors with corsOptions passed to it.
@@ -88,39 +92,52 @@ if (debug) {
   });
 }
 
+app.use(cookieParser());
+
 // ROUTES GO HERE
 // Make a test route that sends back json and status 200 -->
 // Test route yay!  which takes in req and res
-app.get('/test', function(req, res){
+app.use('/test', function(req, res, next){
   // it should respond with a status of 200
   // res is the response object
   // it has a method on it called status
+  const expiresIn = 5 * 60 * 1000;
+  const options = {maxAge: expiresIn, httpOnly: true, secure: true};
+  res.cookie('session', "12345", options);
   res.status(200);
   // it also has a method on it called json
   // which returns a JSON object -> {"somekey": "some value"}
-  res.json({'message': 'worked!'});
+  // res.json({'message': 'worked!'});
   // data.message = "worked!"
+  next();
 });
-
+app.get('/test', (req, res)=>{
+  res.status(200);
+  res.json({'message': 'worked!'})
+})
 
 // verify firebase user via routehandler
 app.post('/auth', authenticateUser );
 
-// app.use('/dreams', function(req, res){
-//   const sessionCookie = req.cookies.session || '';
-//   // Verify the session cookie. In this case an additional check is added to detect
-//   // if the user's Firebase session was revoked, user deleted/disabled, etc.
-//   admin.auth().verifySessionCookie(
-//     sessionCookie, true /** checkRevoked */)
-//     .then((decodedClaims) => {
-//       serveContentForUser('/dreams', req, res, decodedClaims);
-//     })
-//     .catch(error => {
-//       // Session cookie is unavailable or invalid. Force user to login.
-//       console.log("test session cookie error ", error)
-//       // res.redirect('/login');
-//     });
-// })
+
+app.use('/dreams', function(req, res){
+  console.log("req cookies ", req.cookies);
+  const sessionCookie = req.cookies.session || '';
+  // Verify the session cookie. In this case an additional check is added to detect
+  // if the user's Firebase session was revoked, user deleted/disabled, etc.
+  console.log("sessionCookie ", sessionCookie)
+  admin.auth().verifySessionCookie(
+    sessionCookie, true /** checkRevoked */)
+    .then((decodedClaims) => {
+      console.log("dream route verified session cookie ");
+      serveContentForUser('/dreams', req, res, decodedClaims);
+    })
+    .catch(error => {
+      // Session cookie is unavailable or invalid. Force user to login.
+      console.log("test session cookie error ", error)
+      // res.redirect('/login');
+    });
+})
 
 // verify firebase-admin user via middleware
 // const { authMe } = require("./auth");

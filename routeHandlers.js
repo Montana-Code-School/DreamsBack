@@ -105,9 +105,12 @@ module.exports = {
       admin.auth().createSessionCookie(idToken, {expiresIn})
         .then((sessionCookie) => {
          // Set cookie policy for session cookie.
+          console.log("sessionCookie ", sessionCookie)
          const options = {maxAge: expiresIn, httpOnly: true, secure: true};
          res.cookie('session', sessionCookie, options);
-         res.end(JSON.stringify({status: 'success'}));
+         //res.end(JSON.stringify({status: 'session cookie created'}));
+          console.log("keys ", Object.keys(res))
+           res.status(200).json({status: 'session cookie created'})
         }, error => {
           console.log("session cookie error", error);
          //res.status(401).send('UNAUTHORIZED REQUEST!');
