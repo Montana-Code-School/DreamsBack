@@ -92,19 +92,6 @@ if (debug) {
 // Make a test route that sends back json and status 200 -->
 // Test route yay!  which takes in req and res
 app.get('/test', function(req, res){
-  const sessionCookie = req.cookies.session || '';
-  // Verify the session cookie. In this case an additional check is added to detect
-  // if the user's Firebase session was revoked, user deleted/disabled, etc.
-  admin.auth().verifySessionCookie(
-    sessionCookie, true /** checkRevoked */)
-    .then((decodedClaims) => {
-      serveContentForUser('/test', req, res, decodedClaims);
-    })
-    .catch(error => {
-      // Session cookie is unavailable or invalid. Force user to login.
-      console.log("test session cookie error ", error)
-      // res.redirect('/login');
-    });
   // it should respond with a status of 200
   // res is the response object
   // it has a method on it called status
@@ -113,11 +100,27 @@ app.get('/test', function(req, res){
   // which returns a JSON object -> {"somekey": "some value"}
   res.json({'message': 'worked!'});
   // data.message = "worked!"
-
 });
+
 
 // verify firebase user via routehandler
 app.post('/auth', authenticateUser );
+
+// app.use('/dreams', function(req, res){
+//   const sessionCookie = req.cookies.session || '';
+//   // Verify the session cookie. In this case an additional check is added to detect
+//   // if the user's Firebase session was revoked, user deleted/disabled, etc.
+//   admin.auth().verifySessionCookie(
+//     sessionCookie, true /** checkRevoked */)
+//     .then((decodedClaims) => {
+//       serveContentForUser('/dreams', req, res, decodedClaims);
+//     })
+//     .catch(error => {
+//       // Session cookie is unavailable or invalid. Force user to login.
+//       console.log("test session cookie error ", error)
+//       // res.redirect('/login');
+//     });
+// })
 
 // verify firebase-admin user via middleware
 // const { authMe } = require("./auth");
