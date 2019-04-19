@@ -14,3 +14,9 @@ module.exports = {
  }
 }
 
+// [CREATE_ARTICLE](req, res) = {
+//     Article.create(req.body, (err, savedArticle) => {
+//     if (err) return res.status(400).json(err);
+//     res.status(201).json(savedArticle);
+//     });
+//   }
