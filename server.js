@@ -52,7 +52,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', onDBConnected);
 
 //import route handler for LitPage from articles.js
-const { getArticles } = require('./articles');
+const { getArticles, createArticle, getAllArticles, deleteArticle } = require('./articles');
 
 // routeHandlers are imported and destructured from our exported routeHandlers file
 const {
@@ -97,6 +97,15 @@ app.get('/test', function(req, res){
 });
 // Get articles
 app.get('/articles', getArticles);
+
+//Get ALL articles
+app.get('/articles/all', getAllArticles);
+
+// Post articles
+app.post('/articles', createArticle);
+
+// Delete articles
+app.delete('/articles', deleteArticle);
 
 // make a request to the stemmer
 app.post('/stem', stem );
