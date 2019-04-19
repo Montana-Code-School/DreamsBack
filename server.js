@@ -119,22 +119,39 @@ app.get('/test', (req, res)=>{
 // verify firebase user via routehandler
 app.post('/auth', authenticateUser );
 
-
-app.use('/dreams', function(req, res){
-  console.log("req cookies ", req.cookies);
-  const sessionCookie = req.cookies.session || '';
+// try to use the session cookie in a call to /dreams
+app.use('/dreams', function(req, res, next){
+  const resHeaders = res.getHeaders();
+  console.log("dreams route res headers, ", resHeaders);
+  //console.log("dreams route req headers, ", req.getHeader(cookies));
+  console.log("/dreams route req.cookies", req.cookies);
+  const _sessionCookie = req.cookies.session || '';
   // Verify the session cookie. In this case an additional check is added to detect
   // if the user's Firebase session was revoked, user deleted/disabled, etc.
-  console.log("sessionCookie ", sessionCookie)
   admin.auth().verifySessionCookie(
-    sessionCookie, true /** checkRevoked */)
+    _sessionCookie, true /** checkRevoked */)
     .then((decodedClaims) => {
-      console.log("dream route verified session cookie ");
-      serveContentForUser('/dreams', req, res, decodedClaims);
+      console.log("dream route verified decodedClaims ", decodedClaims);
+      // serveContentForUser('/dreams', req, res, decodedClaims);
+      //res.setHeader('Set-Cookie', `session=${sessionCookie}`)
+      next();
     })
     .catch(error => {
+      console.log("session cookie error: ", error)
+      res.clearCookie('session');
+      res.clearCookie('_session');
+      
+      admin.auth().verifySessionCookie(_sessionCookie)
+        .then((decodedClaims) => {
+          return admin.auth().revokeRefreshTokens(decodedClaims.sub);
+        })
+        .then(() => {
+          console.log("maybe revoked")
+        })
+        .catch((error) => {
+          console.log("error on revoked")
+        });
       // Session cookie is unavailable or invalid. Force user to login.
-      console.log("test session cookie error ", error)
       // res.redirect('/login');
     });
 })
