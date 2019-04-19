@@ -12,14 +12,14 @@ const imageData = [
   {
     _id: `${_id}a`,
     url: FIRST_URL, 
-    caption: CAP_ONE,
+    keyword: CAP_ONE,
     createdAt: DATE_ONE,
     updatedAt: DATE_ONE,
   },
   {
     _id: `${_id}b`,
     url: SECOND_URL, 
-    caption: CAP_TWO,
+    keyword: CAP_TWO,
     createdAt: DATE_TWO,
     updatedAt: DATE_TWO,
   }
@@ -28,11 +28,11 @@ const imageData = [
 const bodyImagesData = [
   {
     url: FIRST_URL, 
-    caption: CAP_ONE
+    keyword: CAP_ONE
   },
   {
     url: SECOND_URL, 
-    caption: CAP_TWO
+    keyword: CAP_TWO
   }
 ];
 

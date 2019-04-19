@@ -9,15 +9,25 @@ const {
   ERR_QUERY,
   ERR_ID,
   ERR_CONTENT,
-  ERR_USERID
+  ERR_USERID,
+  STEM,
+  CHUNK,
 } = require('./constants');
 
 const { Dream, Image } = require('./models');
 
-const { allNewImages, noNewImages, mixedOldAndNewImages, noImages } = require('./test/data/dream')
+const axios = require('axios');
+
+const { allNewImages, noNewImages, mixedOldAndNewImages, noImages } = require('./test/data/dream');
 
 const bodyValid = (req, res, type) => {
   switch (type) {
+  case STEM:
+    if(!req.body) {
+      return res.status(400).json({ error: ERR_BODY });
+    } else {
+      return true;
+    }
   case CREATE_DREAM:
     if(!req.body) {
       return res.status(400).json({ error: ERR_BODY });
@@ -72,6 +82,37 @@ const bodyValid = (req, res, type) => {
 };
 
 module.exports = {
+  [STEM](req, res) {
+    // if(bodyValid(req, res, STEM)) {
+    const params = new URLSearchParams();
+    console.log('req body ', req.body);
+    params.append('text', req.body.text);
+    params.append('stemmer', 'wordnet');
+    axios.post('http://text-processing.com/api/stem/', params)
+      .then(response => {
+        console.log('axios response, ', response.data);
+        res.status(200).json(response.data);
+      })
+      .catch((error) => {
+        res.status(400).json(error);
+      });
+    // }
+  },
+  [CHUNK](req, res) {
+    // if(bodyValid(req, res, STEM)) {
+    const params = new URLSearchParams();
+    console.log('req body ', req.body);
+    params.append('text', req.body.text);
+    axios.post('http://text-processing.com/api/tag/', params)
+      .then(response => {
+        console.log('axios response, ', response.data);
+        res.status(200).json(response.data);
+      })
+      .catch((error) => {
+        res.status(400).json(error);
+      });
+    // }
+  },
   [CREATE_DREAM](req, res) {
     if(bodyValid(req, res, CREATE_DREAM)) {
       Image.create(req.body.images, (err, savedImages) => {
@@ -94,21 +135,20 @@ module.exports = {
   [EDIT_DREAM](req, res){
     let noImgs = !req.body.images.length;
     let allNew = !req.body.images.filter( image => image._id).length;
-    let someNew = (req.body.images.filter( image => image._id).length !== req.body.images.length)
-    let noNew = (req.body.images.filter( image => image._id).length === req.body.images.length)
-
+    let someNew = (req.body.images.filter( image => image._id).length !== req.body.images.length);
+    let noNew = (req.body.images.filter( image => image._id).length === req.body.images.length);
     if(noImgs) {
       if(bodyValid(req, res, EDIT_DREAM)) {
         const { _id, title, content, userId, images } = req.body;
-        const imagePromises = []
+        const imagePromises = [];
         for (let i = 0; i < images.length; i++) {
           imagePromises.push(Image.findByIdAndUpdate(
             images[i]._id,
-            { caption: images[i].caption },
+            { keyword: images[i].keyword, lastViewedIndex: images[i].lastViewedIndex },
             { new: true },
             (err, savedImage) => {
-             if (err) return res.status(400).json(err);
-          }).exec())
+              if (err) return res.status(400).json(err);
+            }).exec());
         }
         Promise.all(imagePromises)
           .then(()=> {
@@ -116,28 +156,28 @@ module.exports = {
               _id,
               {title, content, userId, images},
               {new: true},
-              function(err, editedDream){
+            ).populate('images')
+              .exec(function(err, editedDream){
                 if (err) return res.status(400).json(err);
                 res.status(200).json(editedDream);
-              }
-            );
-          })
+              });
+          });
       }
     } else if (allNew) {
       if(bodyValid(req, res, EDIT_DREAM)) {
-        const { _id, title, content, userId, images } = req.body
+        const { _id, title, content, userId, images } = req.body;
         Image.create(images, (err, savedImages) => {
           if (err) return res.status(400).json(err);
           Dream.findByIdAndUpdate(
             _id,
             {title, content, userId, images: savedImages},
             {new: true},
-            function(err, editedDream){
+          ).populate('images')
+            .exec(function(err, editedDream){
               if (err) return res.status(400).json(err);
               res.status(200).json(editedDream);
-            }
-          );
-        })
+            });
+        });
       }
     } else if (someNew) {
       if(bodyValid(req, res, EDIT_DREAM)) {
@@ -147,9 +187,9 @@ module.exports = {
         let imagesWithId = [];
         for (let i = 0; i < images.length; i++){
           if(!images[i]._id){
-            imagesWithoutId.push(images[i])
+            imagesWithoutId.push(images[i]);
           } else {
-            imagesWithId.push(images[i])
+            imagesWithId.push(images[i]);
           }
         }
         Image.create(imagesWithoutId, (err, savedImages) => {
@@ -159,25 +199,25 @@ module.exports = {
             _id,
             {title, content, userId, images},
             {new: true},
-            function(err, editedDream){
+          ).populate('images')
+            .exec(function(err, editedDream){
               if (err) return res.status(400).json(err);
               res.status(200).json(editedDream);
-            }
-          );
-        })
+            });
+        });
       }
     } else if (noNew){
       if(bodyValid(req, res, EDIT_DREAM)) {
         const { _id, title, content, userId, images } = req.body;
-        const imagePromises = []
+        const imagePromises = [];
         for (let i = 0; i < images.length; i++) {
           imagePromises.push(Image.findByIdAndUpdate(
             images[i]._id,
-            { caption: images[i].caption },
+            { keyword: images[i].keyword, lastViewedIndex: images[i].lastViewedIndex },
             { new: true },
             (err, savedImage) => {
-             if (err) return res.status(400).json(err);
-          }).exec())
+              if (err) return res.status(400).json(err);
+            }).exec());
         }
         Promise.all(imagePromises)
           .then(()=> {
@@ -185,12 +225,12 @@ module.exports = {
               _id,
               {title, content, userId, images},
               {new: true},
-              function(err, editedDream){
+            ).populate('images')
+              .exec(function(err, editedDream){
                 if (err) return res.status(400).json(err);
                 res.status(200).json(editedDream);
-              }
-            );
-          })
+              });
+          });
       }
     }
   },

@@ -21,8 +21,12 @@ const imageSchema = new Schema({
     type: String,
     required: true,
   },
-  caption: {
+  keyword: {
     type: String,
+    required: true,
+  },
+  lastViewedIndex: {
+    type: Number,
     required: true,
   },
 }, {timestamps: true});
