@@ -87,56 +87,27 @@ const bodyValid = (req, res, type) => {
 
 module.exports = {
   [AUTHENTICATE_USER](req, res, next) {
-    // if(bodyValid(req, res, STEM)) {
     
       const idToken = req.body.idToken.toString();
-      // const csrfToken = req.body.csrfToken.toString();
-      // Guard against CSRF attacks.
-      // if (csrfToken !== req.cookies.csrfToken) {
-      //   res.status(401).send('UNAUTHORIZED REQUEST!');
-      //   return;
-      // }
-      // Set session expiration to the minimum (5 mins).
-      const expiresIn = 6 * 60 * 1000;
-      // Create the session cookie. This will also verify the ID token in the process.
-      // The session cookie will have the same claims as the ID token.
-      // To only allow session cookie setting on recent sign-in, auth_time in ID token
-      // can be checked to ensure user was recently signed in before creating a session cookie.
+      
+      const expiresIn = 14 * 24 * 60 * 60 * 1000;
       admin.auth().createSessionCookie(idToken, {expiresIn})
         .then((_sessionCookie) => {
           console.log("auth route _sessioncookie: ", _sessionCookie)
          // Set cookie policy for session cookie.
           const options = {maxAge: expiresIn, httpOnly: true, secure: true};
-         //res.end(JSON.stringify({status: 'session cookie created'}));
           res.cookie('_session', _sessionCookie, options);
           res.setHeader('Set-Cookie', `_session=${_sessionCookie}`)
           res.status(200).json({status: '_session cookie created'})
-          
         }, error => {
           console.log("session cookie error", error);
           res.clearCookie('session');
           res.clearCookie('_session')
          //res.status(401).send('UNAUTHORIZED REQUEST!');
         });
-    
-    // console.log('req body ', req.body);
-    // admin.auth().verifyIdToken(req.body.idToken)
-    //   .then(function(decodedToken) {
-    //     var uid = decodedToken.uid;
-    //     // ...
-    //     console.log("decodedToken", decodedToken);
-    //     console.log("verifiedId ", uid);
-    //     // return res.status(200).json();
-    //     // next.apply(this, arguments);
-    //   }).catch(function(error) {
-    //     return res.status(401).end()
-    //   });
-
-
-    // }
   },
   [STEM](req, res) {
-    // if(bodyValid(req, res, STEM)) {
+
     const params = new URLSearchParams();
     console.log('req body ', req.body);
     params.append('text', req.body.text);
@@ -149,10 +120,9 @@ module.exports = {
       .catch((error) => {
         res.status(400).json(error);
       });
-    // }
+
   },
   [CHUNK](req, res) {
-    // if(bodyValid(req, res, STEM)) {
     const params = new URLSearchParams();
     console.log('req body ', req.body);
     params.append('text', req.body.text);
@@ -164,7 +134,6 @@ module.exports = {
       .catch((error) => {
         res.status(400).json(error);
       });
-    // }
   },
   [CREATE_DREAM](req, res) {
     if(bodyValid(req, res, CREATE_DREAM)) {

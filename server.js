@@ -18,9 +18,20 @@ const cors = require('cors');
 
 // add firebase auth to our server
 const admin = require('firebase-admin');
-
+console.log(process.env)
 admin.initializeApp({
-  credential: admin.credential.applicationDefault(),
+  credential: admin.credential.cert({
+    "type": process.env.FIREBASE_TYPE,
+    "project_id": process.env.FIREBASE_PROJECT_ID,
+    "private_key_id": process.env.FIREBASE_PRIVATE_KEY_ID,
+    "private_key": process.env.FIREBASE_PRIVATE_KEY,
+    "client_email": process.env.FIREBASE_CLIENT_EMAIL,
+    "client_id": process.env.FIREBASE_CLIENT_ID,
+    "auth_uri": process.env.FIREBASE_AUTH_URI,
+    "token_uri": process.env.FIREBASE_TOKEN_URI,
+    "auth_provider_x509_cert_url": process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+    "client_x509_cert_url": process.env.FIREBASE_CLIENT_X509_CERT_URL
+  }),
   databaseURL: 'https://dream-journal-test.firebaseio.com'
 });
 
@@ -122,48 +133,23 @@ app.post('/auth', authenticateUser );
 // try to use the session cookie in a call to /dreams
 app.use('/dreams', function(req, res, next){
   const resHeaders = res.getHeaders();
-  console.log("dreams route res headers, ", resHeaders);
-  //console.log("dreams route req headers, ", req.getHeader(cookies));
+
   console.log("/dreams route req.cookies", req.cookies);
-  const _sessionCookie = req.cookies.session || '';
-  // Verify the session cookie. In this case an additional check is added to detect
-  // if the user's Firebase session was revoked, user deleted/disabled, etc.
+  const _sessionCookie = req.cookies._session || '';
+
   admin.auth().verifySessionCookie(
     _sessionCookie, true /** checkRevoked */)
     .then((decodedClaims) => {
       console.log("dream route verified decodedClaims ", decodedClaims);
-      // serveContentForUser('/dreams', req, res, decodedClaims);
-      //res.setHeader('Set-Cookie', `session=${sessionCookie}`)
       next();
     })
     .catch(error => {
       console.log("session cookie error: ", error)
       res.clearCookie('session');
       res.clearCookie('_session');
-      
-      admin.auth().verifySessionCookie(_sessionCookie)
-        .then((decodedClaims) => {
-          return admin.auth().revokeRefreshTokens(decodedClaims.sub);
-        })
-        .then(() => {
-          console.log("maybe revoked")
-        })
-        .catch((error) => {
-          console.log("error on revoked")
-        });
-      // Session cookie is unavailable or invalid. Force user to login.
-      // res.redirect('/login');
+
     });
 })
-
-// verify firebase-admin user via middleware
-// const { authMe } = require("./auth");
-// app.use(authMe);
-
-// very firebase current user via middleware
-// const { isAuthenticated } = require('./auth')
-// app.use('/dreams', isAuthenticated);
-
 
 // make a request to the stemmer
 app.post('/stem', stem );
