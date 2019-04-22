@@ -87,9 +87,9 @@ const bodyValid = (req, res, type) => {
 
 module.exports = {
   [AUTHENTICATE_USER](req, res, next) {
-    
+
       const idToken = req.body.idToken.toString();
-      
+      console.log('id token ', idToken);
       const expiresIn = 14 * 24 * 60 * 60 * 1000;
       admin.auth().createSessionCookie(idToken, {expiresIn})
         .then((_sessionCookie) => {
