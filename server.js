@@ -7,11 +7,32 @@ const express = require('express');
 // for reading parameters attached on the body on a web request
 const bodyParser = require('body-parser');
 
+// cookie parser
+const cookieParser = require('cookie-parser');
+
 // mongoose the ODM that connects to mongodb
 const mongoose = require('mongoose');
 
 // add cors into the app
 const cors = require('cors');
+
+// add firebase auth to our server
+const admin = require('firebase-admin');
+admin.initializeApp({
+  credential: admin.credential.cert({
+    "type": process.env.FIREBASE_TYPE,
+    "project_id": process.env.FIREBASE_PROJECT_ID,
+    "private_key_id": process.env.FIREBASE_PRIVATE_KEY_ID,
+    "private_key": process.env.FIREBASE_PRIVATE_KEY,
+    "client_email": process.env.FIREBASE_CLIENT_EMAIL,
+    "client_id": process.env.FIREBASE_CLIENT_ID,
+    "auth_uri": process.env.FIREBASE_AUTH_URI,
+    "token_uri": process.env.FIREBASE_TOKEN_URI,
+    "auth_provider_x509_cert_url": process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+    "client_x509_cert_url": process.env.FIREBASE_CLIENT_X509_CERT_URL
+  }),
+  databaseURL: 'https://dream-journal-test.firebaseio.com'
+});
 
 // Local variables for database
 // Destructure our process.env variables
@@ -28,6 +49,7 @@ const corsOptions = {
   origin: FRONTEND_URL,
   allowedHeaders: 'Origin, X-Requested-With, Content-Type',
   methods: 'GET, PUT, POST, DELETE',
+  credentials: true,
 };
 
 // middleware to attach cors with corsOptions passed to it.
@@ -60,6 +82,7 @@ const {
   editDreamCases,
   stem,
   chunk,
+  authenticateUser,
 } = require('./routeHandlers');
 
 // Must use body-parser middleware before routes are called
@@ -79,19 +102,53 @@ if (debug) {
   });
 }
 
+app.use(cookieParser());
+
 // ROUTES GO HERE
 // Make a test route that sends back json and status 200 -->
 // Test route yay!  which takes in req and res
-app.get('/test', function(req, res){
+app.use('/test', function(req, res, next){
   // it should respond with a status of 200
   // res is the response object
   // it has a method on it called status
+  const expiresIn = 5 * 60 * 1000;
+  const options = {maxAge: expiresIn, httpOnly: true, secure: true};
+  res.cookie('session', "12345", options);
   res.status(200);
   // it also has a method on it called json
   // which returns a JSON object -> {"somekey": "some value"}
-  res.json({'message': 'worked!'});
+  // res.json({'message': 'worked!'});
   // data.message = "worked!"
+  next();
 });
+app.get('/test', (req, res)=>{
+  res.status(200);
+  res.json({'message': 'worked!'})
+})
+
+// verify firebase user via routehandler
+app.post('/auth', authenticateUser );
+
+// try to use the session cookie in a call to /dreams
+app.use('/dreams', function(req, res, next){
+  const resHeaders = res.getHeaders();
+
+  console.log("/dreams route req.cookies", req.cookies);
+  const _sessionCookie = req.cookies._session || '';
+
+  admin.auth().verifySessionCookie(
+    _sessionCookie, true /** checkRevoked */)
+    .then((decodedClaims) => {
+      console.log("dream route verified decodedClaims ", decodedClaims);
+      next();
+    })
+    .catch(error => {
+      console.log("session cookie error: ", error)
+      res.clearCookie('session');
+      res.clearCookie('_session');
+
+    });
+})
 
 // make a request to the stemmer
 app.post('/stem', stem );
