@@ -8,8 +8,10 @@ const GET_ALL_ARTICLES = 'getAllArticles';
 const DELETE_ARTICLE = 'deleteArticle';
 const STEM = 'stem';
 const CHUNK = 'chunk';
+const AUTHENTICATE_USER = 'authenticateUser';
 
 module.exports = {
+  AUTHENTICATE_USER,
   CHUNK,
   STEM,
   CREATE_DREAM,
