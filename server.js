@@ -18,7 +18,6 @@ const cors = require('cors');
 
 // add firebase auth to our server
 const admin = require('firebase-admin');
-console.log(process.env)
 admin.initializeApp({
   credential: admin.credential.cert({
     "type": process.env.FIREBASE_TYPE,
