@@ -5,8 +5,10 @@ const GET_DREAMS_BY_USERID = 'getDreamsByUserId';
 const STEM = 'stem';
 const CHUNK = 'chunk';
 const AUTHENTICATE_USER = 'authenticateUser';
+const LOGOUT = 'logout';
 
 module.exports = {
+  LOGOUT,
   AUTHENTICATE_USER,
   CHUNK,
   STEM,

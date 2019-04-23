@@ -52,6 +52,7 @@ const {
   stem,
   chunk,
   authenticateUser,
+  logout,
 } = require('./routeHandlers');
 
 // CorsOptions allows 3rd party apps to be used
@@ -151,49 +152,9 @@ app.get('/test', (req, res)=>{
   res.json({'message': 'worked!'})
 })
 
-app.post('/auth', function (req, res) {
-  const idToken = req.body.idToken.toString();
+app.post('/auth', authenticateUser);
 
-  const expiresIn = 60 * 60 * 24 * 5 * 1000;
-  admin.auth().verifyIdToken(idToken).then(function(decodedClaims) {
-    if (new Date().getTime() / 1000 - decodedClaims.auth_time < 5 * 60) {
-      return admin.auth().createSessionCookie(idToken, {expiresIn: expiresIn});
-    }
-    throw new Error('UNAUTHORIZED REQUEST!');
-  })
-  .then(function(sessionCookie) {
-    const options = {maxAge: expiresIn, httpOnly: true, secure: false /** to test in localhost */};
-    res.cookie('session', sessionCookie, options);
-    res.end(JSON.stringify({status: 'success'}));
-  })
-  .catch(function(error) {
-    res.status(401).send('UNAUTHORIZED REQUEST!');
-  });
-});
-
-app.get('/logout', function (req, res) {
-  // Clear cookie.
-  var sessionCookie = req.cookies.session || '';
-  res.clearCookie('session');
-  // Revoke session too. Note this will revoke all user sessions.
-  if (sessionCookie) {
-    admin.auth().verifySessionCookie(sessionCookie, true).then(function(decodedClaims) {
-      return admin.auth().revokeRefreshTokens(decodedClaims.sub);
-    })
-    .then(function() {
-      // Redirect to login page on success, handle in react router.
-      console.log("Redirect to login page on success");
-      return res.status(200).json({logout: "true"})
-    })
-    .catch(function() {
-      // Redirect to login page on error, handle in react router.
-      console.log("catch block to login page on success");
-    });
-  } else {
-    // Redirect to login page when no session cookie available, handle in react router.
-    console.log("else block to login page")
-  }
-});
+app.get('/logout', logout);
 
 // make a request to the stemmer
 app.post('/stem', stem );
