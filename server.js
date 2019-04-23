@@ -54,6 +54,12 @@ const corsOptions = {
 
 // middleware to attach cors with corsOptions passed to it.
 app.use(cors(corsOptions));
+// Parse 'em
+app.use(cookieParser());
+// Must use body-parser middleware before routes are called
+app.use(bodyParser.urlencoded({ extended: true }));
+// parse the response body back into a json object
+app.use(bodyParser.json());
 
 // connect to your database on localhost through the URI
 // now we have our URI, what do we need to pass it here -->
@@ -88,11 +94,6 @@ const {
   authenticateUser,
 } = require('./routeHandlers');
 
-// Must use body-parser middleware before routes are called
-app.use(bodyParser.urlencoded({ extended: true }));
-// parse the response body back into a json object
-app.use(bodyParser.json());
-
 const debug = false;
 if (debug) {
   app.use((req, res, next)=>{
@@ -104,8 +105,6 @@ if (debug) {
     next();
   });
 }
-
-app.use(cookieParser());
 
 // ROUTES GO HERE
 app.get('/test', (req, res)=>{
@@ -128,25 +127,25 @@ app.delete('/articles', deleteArticle);
 // verify firebase user via routehandler
 app.post('/auth', authenticateUser );
 
+app.get('/logout', function (req, res) {
+  res.clearCookie('session');
+})
+
 // try to use the session cookie in a call to /dreams
-app.use('/dreams', function(req, res, next){
-  const resHeaders = res.getHeaders();
-
-  console.log("/dreams route req.cookies", req.cookies);
-  const _sessionCookie = req.cookies._session || '';
-
-  admin.auth().verifySessionCookie(
-    _sessionCookie, true /** checkRevoked */)
-    .then((decodedClaims) => {
-      console.log("dream route verified decodedClaims ", decodedClaims);
-      next();
-    })
-    .catch(error => {
-      console.log("session cookie error: ", error)
-      res.clearCookie('session');
-      res.clearCookie('_session');
-
-    });
+app.use('/secure', function(req, res, next){
+  console.log("secure middleware");
+  console.log(req.cookies);
+  // const _sessionCookie = req.cookies._session || '';
+ 
+  // admin.auth().verifySessionCookie(
+  //   _sessionCookie, true /** checkRevoked */)
+  //   .then((decodedClaims) => {
+  //     console.log("dream route verified decodedClaims ", decodedClaims);
+  //     next();
+  //   })
+  //   .catch(error => {
+  //     console.log("session cookie error: ", error)
+  //   });
 })
 
 // make a request to the stemmer
@@ -156,16 +155,16 @@ app.post('/stem', stem );
 app.post('/chunk', chunk );
 
 // put dreams in the DB
-app.post('/dreams', createDream );
+app.post('/secure/dreams', createDream );
 
 // Get dreams by user id from the DB
-app.get('/dreams', getDreamsByUserId );
+app.get('/secure/dreams', getDreamsByUserId );
 
 // editing a dream, saving it in the DB and recieving edited dreams from the DB
-app.put('/dreams', editDream);
+app.put('/secure/dreams', editDream);
 
 // delete a dream
-app.delete('/dreams', deleteDream);
+app.delete('/secure/dreams', deleteDream);
 
 // Tell our app to listen for calls
 app.listen(PORT, function(){

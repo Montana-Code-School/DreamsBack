@@ -87,24 +87,37 @@ const bodyValid = (req, res, type) => {
 
 module.exports = {
   [AUTHENTICATE_USER](req, res, next) {
-    
-      const idToken = req.body.idToken.toString();
-      
-      const expiresIn = 14 * 24 * 60 * 60 * 1000;
-      admin.auth().createSessionCookie(idToken, {expiresIn})
-        .then((_sessionCookie) => {
-          console.log("auth route _sessioncookie: ", _sessionCookie)
-         // Set cookie policy for session cookie.
-          const options = {maxAge: expiresIn, httpOnly: true, secure: true};
-          res.cookie('_session', _sessionCookie, options);
-          res.setHeader('Set-Cookie', `_session=${_sessionCookie}`)
-          res.status(200).json({status: '_session cookie created'})
-        }, error => {
-          console.log("session cookie error", error);
-          res.clearCookie('session');
-          res.clearCookie('_session')
-         //res.status(401).send('UNAUTHORIZED REQUEST!');
-        });
+    const idToken = req.body.idToken.toString();
+    const expiresIn = 300000;  // minimum 5 minutes
+    admin.auth().verifyIdToken(idToken).then(function(decodedClaims) {
+      // In this case, we are enforcing that the user signed in in the last 5 minutes.
+      return admin.auth().createSessionCookie(idToken, {expiresIn: expiresIn});
+    })
+    .then(function(sessionCookie) {
+      // Note httpOnly cookie will not be accessible from javascript.
+      // secure flag should be set to true in production.
+      var options = {maxAge: expiresIn, httpOnly: true, secure: false /** to test in localhost */};
+      res.cookie('session', sessionCookie, options);
+      res.end(JSON.stringify({status: 'success'}));
+    })
+    .catch(function(error) {
+      res.status(401).send('UNAUTHORIZED REQUEST!');
+    });
+
+    // admin.auth().createSessionCookie(idToken, {expiresIn})
+    //   .then((sessionCookie) => {
+    //     const options = {maxAge: expiresIn, httpOnly: true, secure: true};
+    //     res.cookie('session', sessionCookie, options);
+    //     res.status(200).end(JSON.stringify({valid: true, status: 'success'}));
+    //   }, error => {
+    //     if (error.code == 'auth/id-token-revoked') {
+    //       console.log("token revoked");
+    //       res.status(501).end(JSON.stringify({valid: false, status: 'revoked'}));
+    //     } else {
+    //       console.log("token invalid", error);
+    //       res.status(501).end(JSON.stringify({valid: false, status: 'invalid'}));
+    //     }
+    //   });
   },
   [STEM](req, res) {
 
