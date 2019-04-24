@@ -18,6 +18,7 @@ const cors = require('cors');
 
 // add firebase auth to our server
 const admin = require('firebase-admin');
+
 admin.initializeApp({
   credential: admin.credential.cert({
     "type": process.env.FIREBASE_TYPE,
@@ -41,6 +42,19 @@ const { MONGODB_URI, PORT, FRONTEND_URL } = process.env;
 // build an instance of our app:
 const app = express();
 
+// routeHandlers are imported and destructured from our exported routeHandlers file
+const {
+  createDream,
+  getDreamsByUserId,
+  editDream,
+  deleteDream,
+  editDreamCases,
+  stem,
+  chunk,
+  authenticateUser,
+  logout,
+} = require('./routeHandlers');
+
 // CorsOptions allows 3rd party apps to be used
 // origin is where our requests begin
 // allowedHeaders is what kind of meta-data we are selecting
@@ -54,6 +68,9 @@ const corsOptions = {
 
 // middleware to attach cors with corsOptions passed to it.
 app.use(cors(corsOptions));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // connect to your database on localhost through the URI
 // now we have our URI, what do we need to pass it here -->
@@ -62,6 +79,46 @@ mongoose.connect(MONGODB_URI, {useNewUrlParser: true});
 // notifying us that mongoose is connected to the server
 function onDBConnected(){
   console.log('we are connected to mongo db');
+}
+
+/**
+ * Attaches a CSRF token to the request.
+ * @param {string} url The URL to check.
+ * @param {string} cookie The CSRF token name.
+ * @param {string} value The CSRF token value to save.
+ * @return {function} The middleware function to run.
+ */
+function attachCsrfToken(url, cookie, value) {
+  return function(req, res, next) {
+    if (req.url == url) {
+      res.cookie(cookie, value);
+    }
+    next();
+  }
+}
+
+/**
+ * Checks if a user is signed in and if so, redirects to profile page.
+ * @param {string} url The URL to check if signed in.
+ * @return {function} The middleware function to run.
+ */
+function checkIfSignedIn(url) {
+  return function(req, res, next) {
+    if (req.url == url) {
+      var sessionCookie = req.cookies.session || '';
+      // User already logged in.
+      console.log("Session cookie being checked")
+      admin.auth().verifySessionCookie(sessionCookie).then(function(decodedClaims) {
+        console.log("Session cookie success")
+        res.status(200).json({signedIn: true, status: "success"})
+      }).catch(function(error) {
+        console.log("Session cookie error, ", error)
+        next();
+      });
+    } else {
+      next();
+    }
+  }
 }
 
 // stashing this in a variable that we can call methods on
@@ -86,6 +143,7 @@ const {
   stem,
   chunk,
   authenticateUser,
+  logout
 } = require('./routeHandlers');
 
 // Must use body-parser middleware before routes are called
@@ -105,9 +163,11 @@ if (debug) {
   });
 }
 
-app.use(cookieParser());
+// Routes
+// Check all routes for session info
+app.use(attachCsrfToken('/', 'csrfToken', (Math.random()* 100000000000000000).toString()));
+app.use(checkIfSignedIn('/',));
 
-// ROUTES GO HERE
 app.get('/test', (req, res)=>{
   res.status(200);
   res.json({'message': 'worked!'})
@@ -128,26 +188,7 @@ app.delete('/articles', deleteArticle);
 // verify firebase user via routehandler
 app.post('/auth', authenticateUser );
 
-// try to use the session cookie in a call to /dreams
-app.use('/dreams', function(req, res, next){
-  const resHeaders = res.getHeaders();
-
-  console.log("/dreams route req.cookies", req.cookies);
-  const _sessionCookie = req.cookies._session || '';
-
-  admin.auth().verifySessionCookie(
-    _sessionCookie, true /** checkRevoked */)
-    .then((decodedClaims) => {
-      console.log("dream route verified decodedClaims ", decodedClaims);
-      next();
-    })
-    .catch(error => {
-      console.log("session cookie error: ", error)
-      res.clearCookie('session');
-      res.clearCookie('_session');
-
-    });
-})
+app.get('/logout', logout);
 
 // make a request to the stemmer
 app.post('/stem', stem );
