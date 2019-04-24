@@ -110,7 +110,7 @@ module.exports = {
   },
   [AUTHENTICATE_USER](req, res) {
     const idToken = req.body.idToken.toString();
-  
+
     const expiresIn = 60 * 60 * 24 * 5 * 1000;
     admin.auth().verifyIdToken(idToken).then(function(decodedClaims) {
       if (new Date().getTime() / 1000 - decodedClaims.auth_time < 5 * 60) {
@@ -124,6 +124,7 @@ module.exports = {
       res.end(JSON.stringify({status: 'success'}));
     })
     .catch(function(error) {
+      console.log(error);
       res.status(401).send('UNAUTHORIZED REQUEST!');
     });
   },

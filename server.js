@@ -130,6 +130,14 @@ db.on('error', console.error.bind(console, 'connection error:'));
 // Confirm connection when connected:
 db.once('open', onDBConnected);
 
+//import route handler for LitPage from articles.js
+const { getArticles, createArticle, getAllArticles, deleteArticle } = require('./articles');
+
+// Must use body-parser middleware before routes are called
+app.use(bodyParser.urlencoded({ extended: true }));
+// parse the response body back into a json object
+app.use(bodyParser.json());
+
 const debug = false;
 if (debug) {
   app.use((req, res, next)=>{
@@ -152,7 +160,20 @@ app.get('/test', (req, res)=>{
   res.json({'message': 'worked!'})
 })
 
-app.post('/auth', authenticateUser);
+// Get articles
+app.get('/articles', getArticles);
+
+//Get ALL articles
+app.get('/articles/all', getAllArticles);
+
+// Post articles
+app.post('/articles', createArticle);
+
+// Delete articles
+app.delete('/articles', deleteArticle);
+
+// verify firebase user via routehandler
+app.post('/auth', authenticateUser );
 
 app.get('/logout', logout);
 

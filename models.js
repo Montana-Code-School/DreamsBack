@@ -31,10 +31,31 @@ const imageSchema = new Schema({
   },
 }, {timestamps: true});
 
+const articleSchema = new Schema({
+  headline:{
+    type: String,
+    required: true,
+  },
+  webUrl:{
+    type: String,
+    required: true
+  },
+  snippet:{
+    type: String,
+    required: true
+  },
+  image:{
+    type: String,
+    required: true
+  }
+})
+
+const Article = mongoose.model('Article', articleSchema);
 const Dream = mongoose.model('Dream', dreamSchema);
 const Image = mongoose.model('Image', imageSchema);
 
 module.exports = {
+  Article,
   Dream,
   Image,
 };
