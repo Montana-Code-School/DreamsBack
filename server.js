@@ -133,19 +133,6 @@ db.once('open', onDBConnected);
 //import route handler for LitPage from articles.js
 const { getArticles, createArticle, getAllArticles, deleteArticle } = require('./articles');
 
-// routeHandlers are imported and destructured from our exported routeHandlers file
-const {
-  createDream,
-  getDreamsByUserId,
-  editDream,
-  deleteDream,
-  editDreamCases,
-  stem,
-  chunk,
-  authenticateUser,
-  logout
-} = require('./routeHandlers');
-
 // Must use body-parser middleware before routes are called
 app.use(bodyParser.urlencoded({ extended: true }));
 // parse the response body back into a json object

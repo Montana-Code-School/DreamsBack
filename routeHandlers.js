@@ -124,6 +124,7 @@ module.exports = {
       res.end(JSON.stringify({status: 'success'}));
     })
     .catch(function(error) {
+      console.log(error);
       res.status(401).send('UNAUTHORIZED REQUEST!');
     });
   },
