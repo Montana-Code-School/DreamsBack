@@ -32,7 +32,7 @@ const imageSchema = new Schema({
 }, {timestamps: true});
 
 const articleSchema = new Schema({
-  headLine:{
+  headline:{
     type: String,
     required: true,
   },
